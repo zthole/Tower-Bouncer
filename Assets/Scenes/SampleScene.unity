@@ -248,10 +248,11 @@ MonoBehaviour:
   platformPrefab: {fileID: 2116135385}
   player: {fileID: 983749984}
   mainCamera: {fileID: 963194227}
-  minimumPlatformSpacing: 1.5
+  minimumSpacing: 0.8
   jumpHeightPercentage: 0.55
-  spawnAheadDistance: 5
-  horizontalSpawnRange: 3
+  startingPlatforms: 5
+  spawnAheadDistance: 3
+  horizontalReachPercentage: 1
 --- !u!4 &730695862
 Transform:
   m_ObjectHideFlags: 0
@@ -429,6 +430,14 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1489134261981943604, guid: 18be0decab2d6c6428ea91b8718037aa, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1489134261981943605, guid: 18be0decab2d6c6428ea91b8718037aa, type: 3}
+      propertyPath: mainCamera
+      value: 
+      objectReference: {fileID: 963194227}
+    - target: {fileID: 1489134261981943607, guid: 18be0decab2d6c6428ea91b8718037aa, type: 3}
+      propertyPath: m_BodyType
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []

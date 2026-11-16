@@ -5,46 +5,81 @@ using UnityEngine;
 public class Knight : MonoBehaviour
 {
     [Header("Movement")]
-    public float moveSpeed = 12f;
+    public float horizontalSpeed = 15f;
+    public float maxHorizontalSpeed = 12f;
 
-    [Header("Jump Settings")]
+    [Header("Jump")]
     public float bounceForce = 12f;
 
-    private Rigidbody2D rb;
-    private Camera mainCamera;
+    [Header("References")]
+    public Camera mainCamera;
 
-    private float mouseX;
+    private Rigidbody2D rb;
+    private float targetX;
 
     void Start() {
         rb = GetComponent<Rigidbody2D>();
-        mainCamera = Camera.main;
+
+        if (mainCamera == null)
+            mainCamera = Camera.main;
+
+        targetX = transform.position.x;
     }
 
     void Update() {
         // Get mouse position in world coordinates
-        Vector3 mousePosition = mainCamera.ScreenToWorldPoint(Input.mousePosition);
-        mouseX = mousePosition.x;
+        Vector3 mousePosition = Input.mousePosition;
+
+        mousePosition.z = -mainCamera.transform.position.z;
+
+        Vector3 worldPosition = mainCamera.ScreenToWorldPoint(mousePosition);
+
+        targetX = worldPosition.x;
     }
 
     void FixedUpdate() {
-        // Move player horizontally toward mouse
-        float direction = mouseX - transform.position.x;
+        // Calculate horizontal movement toward mouse
+        float difference = targetX - rb.position.x;
 
-        float horizontalVelocity = Mathf.Clamp(
-            direction * moveSpeed,
-            -moveSpeed,
-            moveSpeed);
+        float horizontalMovement = Mathf.Clamp(
+            difference * horizontalSpeed,
+            -maxHorizontalSpeed,
+            maxHorizontalSpeed
+        );
 
+        // Preserve vertical bouncing velocity
         rb.velocity = new Vector2(
-            horizontalVelocity,
-            rb.velocity.y);
+            horizontalMovement,
+            rb.velocity.y
+        );
+
+        // Keep player inside camera boundaries
+        float leftEdge = mainCamera.ViewportToWorldPoint(new Vector3(0, 0, 0)).x;
+
+        float rightEdge = mainCamera.ViewportToWorldPoint(new Vector3(1, 0, 0)).x;
+
+        float playerRadius = 0.3f;
+
+        float clampedX = Mathf.Clamp(
+            rb.position.x,
+            leftEdge + playerRadius,
+            rightEdge - playerRadius
+        );
+
+        if (clampedX != rb.position.x) {
+            rb.position = new Vector2(
+                clampedX,
+                rb.position.y
+            );
+        }
     }
 
     private void OnCollisionEnter2D(Collision2D collision) {
-        // Only bounce when landing on top of a platform
         if (collision.gameObject.CompareTag("Platform")) {
             foreach (ContactPoint2D contact in collision.contacts) {
-                if (contact.normal.y > 0.5f && rb.velocity.y <= 0.1f) {
+                // Only bounce when landing on top
+                if (contact.normal.y > 0.5f &&
+                    rb.velocity.y <= 0.1f) {
                     rb.velocity = new Vector2(
                         rb.velocity.x,
                         bounceForce
@@ -56,4 +91,3 @@ public class Knight : MonoBehaviour
         }
     }
 }
-
