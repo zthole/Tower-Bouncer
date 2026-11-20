@@ -41,7 +41,7 @@ public class Platform : MonoBehaviour
         gravity = Mathf.Abs(Physics2D.gravity.y * rb.gravityScale);
 
         bounceForce = controller.bounceForce;
-        horizontalSpeed = controller.maxHorizontalSpeed;
+        horizontalSpeed = controller.horizontalSpeed;
 
         // Calculate theoretical jump height
         maxJumpHeight = (bounceForce * bounceForce) / (2f * gravity);
