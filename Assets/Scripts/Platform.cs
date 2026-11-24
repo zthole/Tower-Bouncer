@@ -10,17 +10,21 @@ public class Platform : MonoBehaviour
     public Camera mainCamera;
 
     [Header("Vertical Spacing")]
-    public float minimumSpacing = 0.8f;
-    [Range(0.1f, 0.8f)]
-    public float jumpHeightPercentage = 0.3f;
+    public float minimumSpacing = 0.5f;
 
-    [Header("Generation")]
+    [Range(0.1f, 0.5f)]
+    public float jumpHeightPercentage = 0.2f;
+
+    [Header("Platform Generation")]
     public int startingPlatforms = 5;
     public float spawnAheadDistance = 3f;
 
     [Header("Horizontal Spacing")]
     [Range(0.1f, 1f)]
-    public float horizontalReachPercentage = 0.65f;
+    public float horizontalReachPercentage = 0.35f;
+
+    [Header("Platform Size")]
+    public float horizontalMargin = 0.75f;
 
     private float highestPlatformY;
     private float previousPlatformX;
@@ -34,77 +38,109 @@ public class Platform : MonoBehaviour
         if (mainCamera == null)
             mainCamera = Camera.main;
 
-        Rigidbody2D rb = player.GetComponent<Rigidbody2D>();
+        if (platformPrefab == null)
+        {
+        Debug.LogError("Assign a Platform Prefab in the Inspector!");
+        enabled = false;
+        return;
+        }
 
         Knight controller = player.GetComponent<Knight>();
+        Rigidbody2D rb = player.GetComponent<Rigidbody2D>();
 
-        gravity = Mathf.Abs(Physics2D.gravity.y * rb.gravityScale);
-
+        // Read movement settings from Knight.cs
         bounceForce = controller.bounceForce;
         horizontalSpeed = controller.horizontalSpeed;
 
-        // Calculate theoretical jump height
-        maxJumpHeight = (bounceForce * bounceForce) / (2f * gravity);
+        // Calculate actual gravity
+        gravity = Mathf.Abs(
+            Physics2D.gravity.y * rb.gravityScale
+        );
+
+        // Calculate maximum theoretical jump height
+        maxJumpHeight =
+            (bounceForce * bounceForce) / (2f * gravity);
 
         highestPlatformY = player.position.y;
         previousPlatformX = player.position.x;
 
-        for (int i = 0; i < startingPlatforms; i++) {
+        // Generate starting platforms
+        for (int i = 0; i < startingPlatforms; i++)
+        {
             GeneratePlatform();
         }
     }
 
     void Update() {
-        float cameraTop = mainCamera.ViewportToWorldPoint(new Vector3(0, 1, 0)).y;
+        float cameraTop = mainCamera.ViewportToWorldPoint(
+            new Vector3(0, 1, 0)
+        ).y;
 
         // Generate platforms above the camera
-        while (highestPlatformY < cameraTop + spawnAheadDistance) {
+        while (highestPlatformY <
+               cameraTop + spawnAheadDistance)
+        {
             GeneratePlatform();
         }
     }
 
     void GeneratePlatform() {
-        // Use a conservative portion of jump height
-        float maxSpacing = maxJumpHeight * jumpHeightPercentage;
+        // Use only 20% of maximum jump height
+        float maxSpacing =
+            maxJumpHeight * jumpHeightPercentage;
 
+        // Avoid spacing larger than the jump limit
         float spacing = Random.Range(
-            minimumSpacing,
+            Mathf.Min(minimumSpacing, maxSpacing * 0.5f),
             maxSpacing
         );
 
-        spacing = Mathf.Min(spacing, maxSpacing);
-
-        // Calculate the time needed to reach the next height
-        float discriminant = (bounceForce * bounceForce) - (2f * gravity * spacing);
+        // Calculate time until player descends to next platform
+        float discriminant =
+            bounceForce * bounceForce -
+            2f * gravity * spacing;
 
         discriminant = Mathf.Max(0f, discriminant);
 
-        float flightTime = (bounceForce + Mathf.Sqrt(discriminant)) / gravity;
+        float flightTime =
+            (bounceForce + Mathf.Sqrt(discriminant)) / gravity;
 
-        // Calculate safe horizontal travel distance
-        float horizontalReach = horizontalSpeed * flightTime * horizontalReachPercentage;
+        // Calculate conservative horizontal travel distance
+        float horizontalReach =
+            horizontalSpeed *
+            flightTime *
+            horizontalReachPercentage;
 
         // Get camera boundaries
-        float leftEdge = mainCamera.ViewportToWorldPoint(new Vector3(0, 0, 0)).x;
+        float leftEdge = mainCamera.ViewportToWorldPoint(
+            new Vector3(0, 0, 0)
+        ).x;
 
-        float rightEdge = mainCamera.ViewportToWorldPoint(new Vector3(1, 0, 0)).x;
+        float rightEdge = mainCamera.ViewportToWorldPoint(
+            new Vector3(1, 0, 0)
+        ).x;
 
-        float margin = 0.5f;
-
-        // Limit spawning to reachable horizontal positions
+        // Restrict horizontal platform positions
         float minX = Mathf.Max(
-            leftEdge + margin,
+            leftEdge + horizontalMargin,
             previousPlatformX - horizontalReach
         );
 
         float maxX = Mathf.Min(
-            rightEdge - margin,
+            rightEdge - horizontalMargin,
             previousPlatformX + horizontalReach
         );
 
-        float xPosition = Random.Range(minX, maxX);
+        // Choose a reachable horizontal position
+        float xPosition = (minX <= maxX)
+            ? Random.Range(minX, maxX)
+            : Mathf.Clamp(
+                previousPlatformX,
+                leftEdge + horizontalMargin,
+                rightEdge - horizontalMargin
+            );
 
-        // Move to next platform height
+        // Update platform height
         highestPlatformY += spacing;
 
         Vector3 spawnPosition = new Vector3(
@@ -112,6 +148,13 @@ public class Platform : MonoBehaviour
             highestPlatformY,
             0f
         );
+
+        // Make sure the prefab still exists
+        if (platformPrefab == null)
+        {
+            Debug.LogError("Platform Prefab is missing or destroyed!");
+            return;
+        }
 
         Instantiate(
             platformPrefab,
