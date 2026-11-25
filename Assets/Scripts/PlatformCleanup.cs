@@ -4,30 +4,38 @@ using UnityEngine;
 
 public class PlatformCleanup : MonoBehaviour
 {
-    public float destroyDistance = 8f;
-    private Camera mainCamera;
+    [Header("Platform Settings")]
+    public float disappearDelay = 0.3f;
 
-    void Start() {
-        mainCamera = Camera.main;
+    private bool hasBeenJumpedOn = false;
 
-        if (mainCamera == null)
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        // Check if the player landed on the platform
+        if (collision.gameObject.CompareTag("Player"))
         {
-            Debug.LogError("Main Camera not found!");
-            enabled = false;
+            foreach (ContactPoint2D contact in collision.contacts)
+            {
+                // Only trigger when player lands on top
+                if (contact.normal.y < -0.5f)
+                {
+                    if (!hasBeenJumpedOn)
+                    {
+                        hasBeenJumpedOn = true;
+                        StartCoroutine(Disappear());
+                    }
+
+                    break;
+                }
+            }
         }
     }
 
-    void Update() {
-        if (mainCamera == null)
-            return;
+    IEnumerator Disappear()
+    {
+        // Wait before destroying platform
+        yield return new WaitForSeconds(disappearDelay);
 
-        float cameraBottom = mainCamera.ViewportToWorldPoint(
-            new Vector3(0, 0, 0)
-        ).y;
-
-        if (transform.position.y < cameraBottom - destroyDistance)
-        {
-            Destroy(gameObject);
-        }
+        Destroy(gameObject);
     }
 }

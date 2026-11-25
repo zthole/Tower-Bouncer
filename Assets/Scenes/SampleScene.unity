@@ -248,9 +248,9 @@ MonoBehaviour:
   platformPrefab: {fileID: 8192310405796017630, guid: ebee72ee78159654eab71437d45c73c3, type: 3}
   player: {fileID: 983749984}
   mainCamera: {fileID: 963194227}
-  minimumSpacing: 0.8
-  jumpHeightPercentage: 0.3
-  startingPlatforms: 3
+  minimumSpacing: 1.5
+  jumpHeightPercentage: 0.4
+  startingPlatforms: 2
   spawnAheadDistance: 1.5
   horizontalReachPercentage: 0.25
   horizontalMargin: 1
