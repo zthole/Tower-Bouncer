@@ -14,14 +14,24 @@ public class PlayerFallDetector : MonoBehaviour
     private Camera mainCamera;
     private bool hasFallen = false;
 
+    private PlayerDistanceTracker distanceTracker;
+
     void Start()
     {
         mainCamera = Camera.main;
+
+        distanceTracker = GetComponent<PlayerDistanceTracker>();
 
         if (mainCamera == null)
         {
             Debug.LogError("Main Camera not found!");
             enabled = false;
+            return;
+        }
+
+        if (distanceTracker == null)
+        {
+            Debug.LogError("PlayerDistanceTracker not found on player");
         }
     }
 
@@ -50,6 +60,17 @@ public class PlayerFallDetector : MonoBehaviour
 
     void ReturnToStartMenu()
     {
+        Debug.Log("Player fell. Returning to start screen");
+
+        // PlayerDistanceTracker distanceTracker =
+        // GetComponent<PlayerDistanceTracker>();
+
+        // Save the player's distance before changing scenes
+        if (distanceTracker != null)
+        {
+            distanceTracker.EndRun();
+        }
+      
         SceneManager.LoadScene(startMenuSceneName);
     }
 }

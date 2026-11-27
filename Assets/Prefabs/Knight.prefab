@@ -402,6 +402,7 @@ GameObject:
   - component: {fileID: 1489134261981943607}
   - component: {fileID: 1489134261981943606}
   - component: {fileID: -3284405816900391102}
+  - component: {fileID: -7655443870154260934}
   m_Layer: 0
   m_Name: Knight
   m_TagString: Player
@@ -496,6 +497,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   fallDistance: 2
   startMenuSceneName: StartScene
+--- !u!114 &-7655443870154260934
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1489134261981943563}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a2a028bff2afe54e9d3b02b3f38c6b2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1489134262354286498
 GameObject:
   m_ObjectHideFlags: 0
